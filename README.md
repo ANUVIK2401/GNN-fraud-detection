@@ -113,16 +113,23 @@ This project implements a state-of-the-art Graph Neural Network (GNN) for detect
 ## 📁 Project Structure
 ```
 graph-fraud-detection/
-├── ieee-data/          # Raw dataset files
-├── data/               # Processed graph data
-├── gnn/                # GNN implementation
-│   ├── data.py        # Data loading
-│   ├── estimator_fns.py # Training utilities
-│   ├── graph_utils.py  # Graph construction
-│   ├── pytorch_model.py # Model implementation
-│   └── utils.py       # Utilities
-├── model/              # Saved models
-└── notebooks/          # Analysis notebooks
+├── ieee-data/          # Raw Kaggle dataset CSVs
+├── data/               # Graph data saved in DGL format
+├── gnn/                # All model components and helpers
+│   ├── data.py
+│   ├── estimator_fns.py
+│   ├── graph_utils.py
+│   ├── pytorch_model.py
+│   └── utils.py
+├── model/              # Trained weights and checkpoints
+├── notebooks/          # Executable Jupyter pipeline
+│   ├── 1_data_preprocessing.ipynb
+│   ├── 2_gnn_model_training.ipynb
+│   └── 3_results_visualization.ipynb
+├── output/             # Visual outputs (e.g., metrics, plots)
+├── train.py            # Script-based training runner
+├── requirements.txt    # Environment configuration
+└── README.md           # You're here!
 ```
 
 ## 🛠️ Technical Stack
