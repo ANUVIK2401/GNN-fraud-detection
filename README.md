@@ -47,7 +47,7 @@ This project implements a state-of-the-art Graph Neural Network (GNN) for detect
 ## 🔄 GNN Pipeline Overview
 
 <p align="center">
-  <img src="gnn_pipeline.jpg" alt="GNN Pipeline" width="700"/>
+  <img src="gnn_pipeline.png" alt="GNN Pipeline" width="700"/>
 </p>
 
 ### Setup Steps
