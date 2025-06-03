@@ -42,9 +42,6 @@ This project implements a state-of-the-art Graph Neural Network (GNN) for detect
 
 ![Graph Structure](graph_intro.png)
 
-## 🔄 GNN Pipeline Overview
-
-![GNN Pipeline](gnn_pipeline.png)
 
 
 
