@@ -31,11 +31,24 @@ This project implements a state-of-the-art Graph Neural Network (GNN) for detect
 - ⚡ Optimized for Google Colab with GPU acceleration
 - 📊 Comprehensive visualization and analysis tools
 
+
 ## 🚀 Quick Start Guide
 
 ### Prerequisites
 - 📱 Google Colab account
 - 📦 IEEE-CIS Fraud Detection dataset from Kaggle
+
+## 🏗️ Technical Architecture
+
+<p align="center">
+  <img src="graph_intro.png" alt="Graph Structure" width="500"/>
+</p>
+
+## 🔄 GNN Pipeline Overview
+
+<p align="center">
+  <img src="gnn_pipeline.jpg" alt="GNN Pipeline" width="700"/>
+</p>
 
 ### Setup Steps
 
