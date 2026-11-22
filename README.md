@@ -16,10 +16,54 @@ Scores card transactions for fraud in real time by looking at **who else recentl
 ## Results
 
 <!-- RESULTS:START -->
-_Run `bash scripts/run_all.sh` on the Kaggle data. This section is filled in automatically by `scripts/report.py`._
+Time-based split on TransactionDT. Test = last 118,108 transactions (3.44% fraud). Threshold chosen on validation, applied once to test.
+
+| Model | PR-AUC | ROC-AUC | Recall @1% FPR | Precision | Recall | F1 |
+|---|---|---|---|---|---|---|
+| LightGBM (features + entity ids) | 0.5009 | 0.8764 | 0.4368 | 0.6097 | 0.4355 | 0.5081 |
+| Temporal hetero GNN | 0.3994 | 0.8432 | 0.3189 | 0.4951 | 0.3474 | 0.4083 |
+| GNN embeddings + LightGBM | 0.4780 | 0.8569 | 0.4134 | 0.5396 | 0.4446 | 0.4875 |
+
+## Which relations the GNN attends to (mean test attention)
+
+| Relation | Weight |
+|---|---|
+| card1 | 0.373 |
+| card2 | 0.233 |
+| addr1 | 0.078 |
+| card6 | 0.077 |
+| R_emaildomain | 0.044 |
+| P_emaildomain | 0.036 |
+| card3 | 0.036 |
+| ProductCD | 0.026 |
+| card5 | 0.024 |
+| DeviceInfo | 0.015 |
+| card4 | 0.014 |
+| addr2 | 0.012 |
+| id_33 | 0.009 |
+| id_30 | 0.009 |
+| id_31 | 0.008 |
+| DeviceType | 0.007 |
+
+## Serving latency (in-process, model + neighbor lookup + state update)
+
+| Device | Batch | p50 ms | p99 ms | txn/s |
+|---|---|---|---|---|
+| cpu | 1 | 1.175 | 1.364 | 808.2 |
+| cpu | 8 | 3.005 | 3.435 | 2541.7 |
+| cpu | 32 | 8.306 | 9.015 | 3693.3 |
+| cpu | 128 | 28.723 | 31.843 | 4205.3 |
 <!-- RESULTS:END -->
 
 Plots: [`results/pr_curve.png`](results/pr_curve.png), [`results/val_pr_auc.png`](results/val_pr_auc.png). Full numbers: [`results/`](results/).
+
+## Findings
+
+- **LightGBM is the strongest single model here** (test PR-AUC 0.50 vs 0.40 for the GNN). IEEE-CIS already ships Vesta's engineered count (C*) and time-delta (D*) features, which summarize much of a card's history, so the neighbor signal the GNN adds is largely redundant with features the trees use directly.
+- **The hybrid did not beat LightGBM (0.48).** GNN embeddings for training rows are in-sample (the GNN saw those labels), so LightGBM over-trusts them and generalizes worse. The fix is out-of-fold embeddings; it is listed below rather than tuned against the test set.
+- **Attention concentrates on card identity** (`card1` 0.37, `card2` 0.23, then `addr1`), matching the common IEEE-CIS finding that card plus address approximates a user.
+- **What the graph path buys in practice:** inductive, real-time scoring with per-relation explanations at 1.2 ms p50 / 1.4 ms p99 per transaction on CPU, and online scores that match offline evaluation.
+- **v1 vs v2:** v1 reported F1 0.85; its own confusion matrix gave about 0.50, and its training loss used test labels. v2 numbers come from a leakage-free time split.
 
 ## How it works
 
@@ -128,6 +172,8 @@ gcloud compute instances delete fraudgnn --zone=us-central1-a
 ```
 
 ## Limitations
+
+- GNN + LightGBM hybrid uses in-sample train embeddings; out-of-fold embeddings (K-fold over time) are the next experiment.
 
 - Neighbor state lives in one process, so the service runs as a single instance. Horizontal scaling needs a shared store (Redis or a graph DB) keyed the same way.
 - Entity embeddings exist only for entities seen in training. New cards and devices still get neighbor and history signal, but a zero embedding.
