@@ -37,3 +37,5 @@ Time-based split on TransactionDT. Test = last 118,108 transactions (3.44% fraud
 | cpu | 8 | 3.005 | 3.435 | 2541.7 |
 | cpu | 32 | 8.306 | 9.015 | 3693.3 |
 | cpu | 128 | 28.723 | 31.843 | 4205.3 |
+
+HTTP on Cloud Run (2 vCPU, concurrency 4, batch 1, from a GCE client in us-central1): end-to-end p50 21.1 ms, p95 36.1 ms, p99 50.3 ms, 174.7 txn/s. Model time inside the service: p50 6.8 ms, p99 21.0 ms.

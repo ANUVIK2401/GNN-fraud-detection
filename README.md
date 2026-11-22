@@ -53,6 +53,7 @@ Time-based split on TransactionDT. Test = last 118,108 transactions (3.44% fraud
 | cpu | 8 | 3.005 | 3.435 | 2541.7 |
 | cpu | 32 | 8.306 | 9.015 | 3693.3 |
 | cpu | 128 | 28.723 | 31.843 | 4205.3 |
+HTTP on Cloud Run (2 vCPU, concurrency 4, batch 1, from a GCE client in us-central1): end-to-end p50 21.1 ms, p95 36.1 ms, p99 50.3 ms, 174.7 txn/s. Model time inside the service: p50 6.8 ms, p99 21.0 ms.
 <!-- RESULTS:END -->
 
 Plots: [`results/pr_curve.png`](results/pr_curve.png), [`results/val_pr_auc.png`](results/val_pr_auc.png). Full numbers: [`results/`](results/).
@@ -126,6 +127,8 @@ bash scripts/run_all.sh
 Tests: `pytest -q` (runs the whole pipeline on synthetic data, checks the sampler never returns past-or-equal-time leakage, and checks online/offline score parity).
 
 ## Serving
+
+**Live demo:** [https://fraudgnn-jx6hfopoya-uc.a.run.app/health](https://fraudgnn-jx6hfopoya-uc.a.run.app/health) (Cloud Run, scales to zero, so the first request may take a few seconds).
 
 ```bash
 docker build -t fraudgnn .          # needs artifacts/bundle from run_all.sh
