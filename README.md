@@ -1,199 +1,156 @@
-# 🎯 Graph Neural Network for Fraud Detection
+# Real-Time Graph Fraud Detection (Temporal Heterogeneous GNN)
 
-<div align="center">
+[![ci](https://github.com/ANUVIK2401/GNN-fraud-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/ANUVIK2401/GNN-fraud-detection/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ANUVIK2401/GNN-fraud-detection)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Stars](https://img.shields.io/github/stars/ANUVIK2401/GNN-fraud-detection?style=social)](https://github.com/ANUVIK2401/GNN-fraud-detection/stargazers)
+Scores card transactions for fraud in real time by looking at **who else recently used the same card, device, email domain or address**. Trained and evaluated on IEEE-CIS (590K transactions), compared against a LightGBM baseline on the same leakage-free split, and served as a FastAPI service whose online scores match offline evaluation.
 
-*A powerful Graph Neural Network implementation for detecting fraudulent transactions with state-of-the-art performance*
+**Highlights**
 
-</div>
+- **Time-respecting graph sampling.** A transaction only sees the K most recent *earlier* transactions on each shared entity. No future neighbors, no test labels, nothing a live system could not see.
+- **Leakage-free evaluation.** Split by `TransactionDT` (60/20/20). Encoders, entity vocabularies and the decision threshold are fit on train/val only. Test is touched once.
+- **Honest baselines.** LightGBM on the same features and entity ids, plus a GNN-embedding + LightGBM hybrid.
+- **Real-time serving.** In-memory neighbor state with cached transaction encodings, so each request does one small forward pass. Online scores are verified against offline scores in CI.
+- **Explainable.** Relation-level attention says which link (card, device, email...) drove each score.
 
-## 📊 Project Overview
+## Results
 
-This project implements a state-of-the-art Graph Neural Network (GNN) for detecting fraudulent transactions using the IEEE-CIS Fraud Detection dataset. The model achieves impressive results:
+<!-- RESULTS:START -->
+_Run `bash scripts/run_all.sh` on the Kaggle data. This section is filled in automatically by `scripts/report.py`._
+<!-- RESULTS:END -->
 
-<div align="center">
+Plots: [`results/pr_curve.png`](results/pr_curve.png), [`results/val_pr_auc.png`](results/val_pr_auc.png). Full numbers: [`results/`](results/).
 
-| Metric | Score | Description |
-|--------|-------|-------------|
-| Precision | 86% | High accuracy in fraud detection |
-| ROC AUC | 92% | Excellent model discrimination |
-| F1 Score | 85% | Balanced precision and recall |
+## How it works
 
-</div>
-
-### 🎯 Key Features
-- 🔄 Heterogeneous Graph Neural Network (HeteroGNN) implementation
-- 🔗 Handles complex relationships between transactions, users, and devices
-- ⚡ Optimized for Google Colab with GPU acceleration
-- 📊 Comprehensive visualization and analysis tools
-
-
-## 🚀 Quick Start Guide
-
-### Prerequisites
-- 📱 Google Colab account
-- 📦 IEEE-CIS Fraud Detection dataset from Kaggle
-
-## 🧱 Graph Construction Architecture
-
-![Graph Structure](graph_intro.png)
-
-
-
-
-### Setup Steps
-
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/ANUVIK2401/GNN-fraud-detection.git
-   cd graph-fraud-detection
-   ```
-
-2. **Download Dataset**
-   - Visit [IEEE-CIS Fraud Detection on Kaggle](https://www.kaggle.com/c/ieee-fraud-detection/data)
-   - Download all CSV files to `./ieee-data/` directory
-
-3. **Run in Google Colab**
-   - Click the "Open in Colab" button above
-   - Follow the notebook instructions
-
-## 🏗️ Technical Architecture
-
-### Graph Structure
-- 📊 **726,345 nodes**: Transactions, users, and devices
-- 🔗 **19,518,802 edges**: Capturing relationships and interactions
-- 🎯 **Multiple node types**: Transactions, cards, addresses, emails
-- 🔄 **Rich edge types**: Temporal, spatial, and behavioral connections
-
-### Model Components
-
-#### Node Features
-- 💳 Card association patterns
-- 📍 Address matching
-- ⏱️ Temporal transaction sequences
-- ✅ Identity verification status
-- 📈 Behavioral features
-
-#### Edge Features
-- 📧 Email domain relationships
-- 🛍️ Product category patterns
-- 📱 Device fingerprinting
-- 🌍 IP geolocation
-- 🌐 Browser signatures
-
-#### Model Architecture
-- 🧠 HeteroRGCN implementation
-- 👁️ Multi-head attention mechanisms
-- 🔄 Residual connections
-- ⚖️ Batch normalization
-
-## 📈 Performance Analysis
-
-### Confusion Matrix
-<div align="center">
-
-| | Predicted Fraud | Predicted Legitimate |
-|:---:|:---:|:---:|
-| **Actual Fraud** | 1,435 | 2,629 |
-| **Actual Legitimate** | 240 | 113,804 |
-
-</div>
-
-### Key Insights
-1. **High Precision Focus** 🎯
-   - 85.7% precision minimizes false positives
-   - Optimized for financial impact reduction
-
-2. **Efficient Processing** ⚡
-   - ~1 hour training on Google Colab GPU
-   - Efficient memory management
-   - Scalable architecture
-
-3. **Production Ready** 🚀
-   - Handles imbalanced data
-   - Robust to fraud patterns
-   - Ready for deployment
-
-## 📁 Project Structure
-```
-graph-fraud-detection/
-├── ieee-data/          # Raw Kaggle dataset CSVs
-├── data/               # Graph data saved in DGL format
-├── gnn/                # All model components and helpers
-│   ├── data.py
-│   ├── estimator_fns.py
-│   ├── graph_utils.py
-│   ├── pytorch_model.py
-│   └── utils.py
-├── model/              # Trained weights and checkpoints
-├── notebooks/          # Executable Jupyter pipeline
-│   ├── 1_data_preprocessing.ipynb
-│   ├── 2_gnn_model_training.ipynb
-│   └── 3_results_visualization.ipynb
-├── output/             # Visual outputs (e.g., metrics, plots)
-├── train.py            # Script-based training runner
-├── requirements.txt    # Environment configuration
-└── README.md           # You're here!
+```mermaid
+flowchart LR
+    subgraph Offline
+        A[IEEE-CIS CSVs] --> B[Time split + encoders fit on train]
+        B --> C[Temporal neighbor index<br/>per relation, sorted by entity+time]
+        C --> D[Temporal hetero GNN]
+        B --> E[LightGBM baseline]
+        D -->|embeddings| F[GNN + LightGBM hybrid]
+        D --> G[Serving bundle<br/>model, encoders, warm state]
+    end
+    subgraph Online
+        R[POST /score] --> S[Encode txn]
+        S --> T[Look up K most recent prior txns<br/>per card / device / email / ...]
+        T --> U[GNN forward + relation attention]
+        U --> V[probability, flag, top relations]
+        U --> W[Ingest: cache encoding, update entity state]
+    end
+    G --> R
 ```
 
-## 🛠️ Technical Stack
-- **PyTorch** 🧠: Deep learning framework
-- **DGL** 📊: Graph neural network operations
-- **Pandas/NumPy** 📈: Data manipulation
-- **Scikit-learn** 📊: Evaluation metrics
-- **Matplotlib/Seaborn** 📊: Visualization
+The graph is bipartite: each transaction links to 16 entity types (`card1..6`, `addr1/2`, `P/R_emaildomain`, `ProductCD`, `DeviceType`, `DeviceInfo`, `id_30` OS, `id_31` browser, `id_33` screen). For a target transaction the model:
 
-## 📚 Research Context
+1. Encodes its own features with an MLP.
+2. For each relation, builds an entity state from the K=10 most recent earlier transactions on that entity, using time-aware messages (`log(1 + seconds since neighbor)`), the entity's learned embedding, and its history count.
+3. Combines relations with semantic attention (HAN-style), then classifies.
 
-### Performance Comparison
-<div align="center">
+Neighbor lookup is a single vectorized `searchsorted` over per-relation arrays sorted by `(entity, time)`. No graph database or graph library is needed.
 
-| Approach | Precision | Interpretability | Scalability |
-|:---:|:---:|:---:|:---:|
-| Logistic Regression | 67% | High | High |
-| Random Forest | 74% | Medium | Medium |
-| **GNN (This Project)** | **85.7%** | Medium | High |
+## What changed from v1
 
-</div>
+v1 (tag [`v1-original`](../../tree/v1-original)) was adapted from AWS's [sagemaker-graph-fraud-detection](https://github.com/awslabs/sagemaker-graph-fraud-detection) HeteroRGCN sample. Auditing it turned up problems that made its numbers unreliable:
 
-### Key Advantages
-1. **Complex Relationship Detection** 🔍
-   - Transaction patterns
-   - User behavior networks
-   - Device associations
+| Issue in v1 | Fix in v2 |
+|---|---|
+| Training loss used labels of **all** nodes, including test nodes (`loss(pred, labels)`) | Loss on train rows only; test labels are never read during training |
+| README reported F1 85%; its own confusion matrix gives **F1 ≈ 0.50** (recall 35%) | Metrics generated by code and written into this README automatically |
+| Best model chosen by training loss, no validation set | Early stopping and threshold selection on a time-based validation split |
+| Full static graph: test transactions' future neighbors visible during training | Strictly-past neighbor sampling, identical offline and online |
+| README listed attention, residuals and batch norm the code did not have | README describes only what the code does |
+| No baseline | LightGBM on the same split, plus a hybrid |
 
-2. **Heterogeneous Data Handling** 📊
-   - Multiple node types
-   - Various edge relationships
-   - Rich feature sets
+## Quickstart
 
-3. **Interpretable Results** 📈
-   - Attention visualization
-   - Feature importance analysis
-   - Network structure insights
+```bash
+pip install torch --index-url https://download.pytorch.org/whl/cpu   # or CUDA build
+pip install -r requirements.txt
 
-## 🤝 Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
+# 1-minute smoke run on synthetic data (numbers are meaningless, it proves the pipeline)
+python scripts/make_synthetic.py --out ieee-data-synth --n 20000
+bash scripts/run_all.sh ieee-data-synth
 
-## 📝 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+# Real data (needs ~/.kaggle/kaggle.json and the competition rules accepted)
+bash scripts/download_data.sh
+bash scripts/run_all.sh
+```
 
-## 👥 Authors
-- Anuvik Thota
+Tests: `pytest -q` (runs the whole pipeline on synthetic data, checks the sampler never returns past-or-equal-time leakage, and checks online/offline score parity).
 
-## 🙏 Acknowledgments
-- IEEE-CIS Fraud Detection dataset
-- DGL team for the graph neural network library
-- PyTorch community
+## Serving
 
----
+```bash
+docker build -t fraudgnn .          # needs artifacts/bundle from run_all.sh
+docker run -p 8080:8080 fraudgnn
 
-<div align="center">
+curl -s localhost:8080/score -H 'content-type: application/json' \
+  -d "{\"transactions\": [$(head -1 artifacts/data/sample_requests.jsonl)]}"
+```
 
-Made with ❤️ by Anuvik Thota
+```json
+{"results": [{"TransactionID": 3546349, "fraud_probability": 0.031, "flagged": false,
+              "top_relations": [{"relation": "card1", "weight": 0.41}, ...]}],
+ "model_latency_ms": 4.8}
+```
 
-</div>
+Endpoints: `POST /score` (1 to 1024 raw transactions, `ingest` flag), `GET /health`, `GET /stats` (rolling p50/p95/p99).
+
+Benchmark: `python scripts/benchmark.py` (in-process, batch sizes 1/8/32/128) or `--url <service>` over HTTP.
+
+## Reproduce on Google Cloud
+
+Training runs on a 16-vCPU CPU VM (about 30 to 60 minutes end to end), so no GPU quota is needed.
+
+```bash
+# 1. In Cloud Shell: create the VM and upload your Kaggle token
+bash scripts/gcp_create_vm.sh
+gcloud compute scp ~/kaggle.json fraudgnn:~ --zone=us-central1-a
+gcloud compute ssh fraudgnn --zone=us-central1-a
+
+# 2. On the VM (inside tmux): test, download, preprocess, train, baselines, export, benchmark, report
+tmux new -s run
+curl -sL https://raw.githubusercontent.com/ANUVIK2401/GNN-fraud-detection/main/scripts/vm_run.sh | bash
+
+# 3. On the VM: deploy the API to Cloud Run and benchmark it over HTTP
+cd GNN-fraud-detection && . .venv/bin/activate
+gcloud run deploy fraudgnn --source . --region us-central1 --memory 4Gi --cpu 2 \
+  --max-instances 1 --allow-unauthenticated
+python scripts/benchmark.py --url "$(gcloud run services describe fraudgnn --region us-central1 --format='value(status.url)')" \
+  --batch-sizes 1 --concurrency 4
+python scripts/report.py
+
+# 4. Delete the VM when done
+gcloud compute instances delete fraudgnn --zone=us-central1-a
+```
+
+## Limitations
+
+- Neighbor state lives in one process, so the service runs as a single instance. Horizontal scaling needs a shared store (Redis or a graph DB) keyed the same way.
+- Entity embeddings exist only for entities seen in training. New cards and devices still get neighbor and history signal, but a zero embedding.
+- Neighbor *labels* are not used. In production, confirmed fraud on a shared card is a strong signal, available with a delay; adding it needs label-delay modeling.
+- IEEE-CIS features are anonymized, so feature-level explanations are limited.
+
+## Project structure
+
+```
+fraudgnn/
+  config.py      relations, split fractions, hyperparameters
+  data.py        loading, time split, FeatureEncoder, EntityIndex
+  graph.py       TemporalNeighborIndex (strictly-past K-recent sampling)
+  model.py       TemporalHeteroGNN
+  preprocess.py  raw CSVs -> arrays
+  train.py       training, early stopping, test evaluation
+  baseline.py    LightGBM + hybrid
+  export.py      serving bundle with warm neighbor state
+  serve/         OnlineScorer + FastAPI app
+scripts/         download, synthetic data, run_all, benchmark, report
+tests/           sampler, encoders, end-to-end, online/offline parity, API
+```
+
+## License
+
+MIT. v1 model code derived from AWS's Apache-2.0 sample, credited above.

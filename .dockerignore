@@ -1,0 +1,5 @@
+*
+!fraudgnn/
+!artifacts/bundle/
+!requirements-serve.txt
+**/__pycache__

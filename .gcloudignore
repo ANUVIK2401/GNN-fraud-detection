@@ -1,0 +1,10 @@
+# Cloud Build context: only what the Dockerfile needs (overrides .gitignore,
+# which would otherwise exclude artifacts/bundle).
+*
+!Dockerfile
+!fraudgnn/
+!fraudgnn/**
+!artifacts/
+!artifacts/bundle/
+!artifacts/bundle/**
+!requirements-serve.txt
