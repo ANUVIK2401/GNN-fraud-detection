@@ -2,7 +2,7 @@
 # Needs a Kaggle API token at ~/.kaggle/kaggle.json and the competition
 # rules accepted once at https://www.kaggle.com/c/ieee-fraud-detection/rules
 set -euo pipefail
-pip install -q kaggle
+pip install -q kaggle six
 mkdir -p ieee-data
 kaggle competitions download -c ieee-fraud-detection -p ieee-data
 unzip -o -q ieee-data/ieee-fraud-detection.zip -d ieee-data
